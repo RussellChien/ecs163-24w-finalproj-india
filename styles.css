@@ -1,0 +1,7 @@
+.top-container {
+    display: flex;
+    justify-content: space-around;
+}
+#line-graph, #bar-chart {
+    flex: 1; 
+}
