@@ -30,6 +30,13 @@ const optionLabels = {
     "Industry (including construction) value added (constant 2015 US$)": "Industry value added (constant 2015 US$)",
     "Foreign direct investment net inflows (% of GDP)": "Foreign direct investment net inflows (% of GDP)"
 }
+const barOptions = {
+    "GDP (current US$)": "GDP",
+    "Individuals using the Internet (% of population)": "Internet",
+    "Exports of goods and services (% of GDP)": "Exports",
+    "Industry (including construction) value added (constant 2015 US$)": "Industry",
+    "Foreign direct investment net inflows (% of GDP)": "FDI"
+}
 
 d3.select('#line_selector')
     .selectAll("options")
@@ -75,8 +82,8 @@ d3.csv("data/india_dataset.csv").then(rawData => {
             "2018": Number(d["2018"]),
             "2019": Number(d["2019"]),
             "2020": Number(d["2020"]),
-            "2021": Number(d["2021"]),
-            "2022": Number(d["2022"])
+            // "2021": Number(d["2021"]),
+            // "2022": Number(d["2022"])
         }
 
     })
@@ -113,7 +120,7 @@ d3.csv("data/india_dataset.csv").then(rawData => {
         .domain([d3.min(rawData, function (d) {
             if (d.IndicatorName == "Individuals using the Internet (% of population)") {
                 let min_value = Infinity
-                for (let i = 1993; i <= 2021; i++) {
+                for (let i = 1993; i <= 2020; i++) {
                     if (d[i] < min_value) {
                         min_value = d[i]
                     }
@@ -123,7 +130,7 @@ d3.csv("data/india_dataset.csv").then(rawData => {
         }), d3.max(rawData, function (d) {
             if (d.IndicatorName == "Individuals using the Internet (% of population)") {
                 let max_value = 0
-                for (let i = 1993; i <= 2021; i++) {
+                for (let i = 1993; i <= 2020; i++) {
                     if (d[i] > max_value) {
                         max_value = d[i]
                     }
@@ -177,7 +184,6 @@ d3.csv("data/india_dataset.csv").then(rawData => {
     svg.append("g").attr("transform", `translate(${50}, ${0})`).call(yAxisCall)
 
     const filteredData = rawData.filter(d => d.IndicatorName === "Individuals using the Internet (% of population)" || d.IndicatorCode === "EG.ELC.ACCS.ZS")
-
     let grpah1dataPoints = []
 
     for (let i = 1993; i <= 2020; i++) {
@@ -302,6 +308,12 @@ d3.csv("data/india_dataset.csv").then(rawData => {
 // parallel coordinates plot
 d3.csv("data/india_dataset_gdpindicators.csv").then(rawData => {
 
+    let data = rawData.map(d => {
+        return dimensions.reduce((acc, dimension) => {
+            acc[dimension] = +d[dimension];
+            return acc;
+        }, {});
+    });
 
     var margin = { top: 60, right: 10, bottom: 30, left: 10 },
         width = screenWidth - margin.left - margin.right,
@@ -313,12 +325,7 @@ d3.csv("data/india_dataset_gdpindicators.csv").then(rawData => {
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    let data = rawData.map(d => {
-        return dimensions.reduce((acc, dimension) => {
-            acc[dimension] = +d[dimension];
-            return acc;
-        }, {});
-    });
+
 
     var yScales = {};
     dimensions.forEach(function (dimension) {
@@ -375,8 +382,28 @@ d3.csv("data/india_dataset_gdpindicators.csv").then(rawData => {
 
 })
 
+d3.select('#bar_selector')
+    .selectAll("options")
+    .data(options)
+    .enter()
+    .append('option')
+    .text(function (d) { return d; })
+    .attr("value", function (d) {
+        return d
+    })
+
 // bar charts - select between the indicators
 d3.csv("data/india_dataset_gdpindicators.csv").then(rawData => {
+    let data = rawData.map(d => ({
+        Year: d.Year,
+        GDP: +d["GDP (current US$)"],
+        Internet: +d["Individuals using the Internet (% of population)"],
+        Exports: +d["Exports of goods and services (% of GDP)"],
+        Industry: +d["Industry (including construction) value added (constant 2015 US$)"],
+        FDI: +d["Foreign direct investment net inflows (% of GDP)"]
+    }));
+    console.log(data)
+
     var margin = { top: 30, right: 140, bottom: 60, left: 90 },
         width = 550 - margin.left - margin.right,
         height = 480 - margin.top - margin.bottom;
@@ -387,5 +414,51 @@ d3.csv("data/india_dataset_gdpindicators.csv").then(rawData => {
         .attr("height", height + margin.top + margin.bottom)
         .append("g")
         .attr("transform", "translate(" + (margin.left) + "," + margin.top + ")");
-    
-})
+
+    var x = d3.scaleBand()
+        .range([0, width])
+        .padding(0.1);
+    var y = d3.scaleLinear()
+        .range([height, 0]);
+
+    function updateChart(selectedOption) {
+        // Clear existing bars
+        svg.selectAll(".bar").remove();
+        console.log(selectedOption)
+
+        // Recalculate y domain based on selected option
+        y.domain([0, d3.max(data, d => d[selectedOption])]);
+
+        // Redraw bars
+        svg.selectAll(".bar")
+            .data(data)
+            .enter().append("rect")
+            .attr("class", "bar")
+            .attr("x", d => x(d.Year))
+            .attr("width", x.bandwidth())
+            .attr("y", d => y(d[selectedOption]))
+            .attr("height", d => height - y(d[selectedOption]));
+
+        // Optionally, update the y-axis if the scale significantly changes between indicators
+        svg.select(".y-axis").call(d3.axisLeft(y));
+    }
+
+    // Initial chart setup
+    x.domain(data.map(d => d.Year));
+    svg.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x));
+
+    svg.append("g")
+        .attr("class", "y-axis")
+        .call(d3.axisLeft(y));
+
+    // Initial chart rendering for default option
+    updateChart(barOptions["GDP (current US$)"]);
+
+    // Dropdown change event listener
+    d3.select('#bar_selector').on("change", function (d) {
+        let selectedOption = d3.select(this).property("value");
+        updateChart(barOptions[selectedOption]);
+    });
+});
