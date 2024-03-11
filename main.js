@@ -405,8 +405,8 @@ d3.csv("data/india_dataset_gdpindicators.csv").then(rawData => {
     console.log(data)
 
     var margin = { top: 30, right: 140, bottom: 60, left: 90 },
-        width = 550 - margin.left - margin.right,
-        height = 480 - margin.top - margin.bottom;
+        width = 1000 - margin.left - margin.right,
+        height = 550 - margin.top - margin.bottom;
 
     var svg = d3.select("#bar-chart")
         .append("svg")
@@ -461,4 +461,27 @@ d3.csv("data/india_dataset_gdpindicators.csv").then(rawData => {
         let selectedOption = d3.select(this).property("value");
         updateChart(barOptions[selectedOption]);
     });
+
+    svg.selectAll(".bar")
+        .data(data)
+        .enter().append("rect")
+        .attr("class", "bar")
+        .attr("x", d => x(d.Year))
+        .attr("width", x.bandwidth())
+        .attr("y", d => y(d[selectedOption]))
+        .attr("height", d => height - y(d[selectedOption]))
+        .on("mouseover", function (event, d) {
+            d3.select("#tooltip")
+                .style("visibility", "visible")
+                .html(`Year: ${d.Year}<br>${selectedOption}: ${d[selectedOption]}`);
+        })
+        .on("mousemove", function (event) {
+            d3.select("#tooltip")
+                .style("top", (event.pageY - 10) + "px")
+                .style("left", (event.pageX + 10) + "px");
+        })
+        .on("mouseout", function () {
+            d3.select("#tooltip")
+                .style("visibility", "hidden");
+        });
 });
