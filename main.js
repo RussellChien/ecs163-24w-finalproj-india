@@ -425,24 +425,66 @@ d3.csv("data/india_dataset_gdpindicators.csv").then(rawData => {
             .data(data)
             .enter().append("rect")
             .attr("class", "bar")
-            .transition()
-            .duration(5000)
             .attr("x", d => x(d.Year))
             .attr("width", x.bandwidth())
-            .attr("y", d => y(d[selectedOption]))
-            .attr("height", d => height - y(d[selectedOption]))
+            .attr("y", height) // Initially set y to the height of the chart
+            .attr("height", 0) // Initially set height to 0
             .style("fill", "orange")
+            .transition()
+            .duration(5000)
+            .attr("y", d => y(d[selectedOption])) // Update y to its final value
+            .attr("height", d => height - y(d[selectedOption])); // Update height to its final value
 
         svg.select(".y-axis").transition().duration(5000).call(d3.axisLeft(y));
 
         // tooltip
         svg.selectAll(".bar")
             .on("mouseover", function (d) {
+                let tooltipHtml = `Year: ${d.Year}<br>${selectedOption}: ${d[selectedOption]}`;
+                if (selectedOption == "FDI") {
+                    if (d.Year == 2000) {
+                        tooltipHtml += `<br>Microsoft announces a $2B investment over 4 years`;
+                    }
+                    else if (d.Year == 2014) {
+                        tooltipHtml += `<br>Amazon invests $2B`;
+                    }
+                    else if (d.Year == 2016) {
+                        tooltipHtml += `<br>Amazon invests $3B`;
+                    }
+                    else if (d.Year == 2018) {
+                        tooltipHtml += `<br>Walmart invests $16B into Flipkart`;
+                    }
+                    else if (d.Year == 2020) {
+                        tooltipHtml += `<br>Google and Meta invest $10.2B into Jio Platforms`;
+                    } 
+                }
+                else if (selectedOption == "GDP") {
+                    if (d.Year == 2014) {
+                        tooltipHtml += `<br>During Modi's first year in office, India's GDP grew at a rate of 7.5%, making India the fastest growing economy in the world`;
+                    }
+                }
+                else if (selectedOption == "Internet") {
+                    if (d.Year == 2015) {
+                        tooltipHtml += `<br>Google installed and maintained free wifi at 400 railway stations`;
+                    }
+                    else if (d.Year == 2016) {
+                        tooltipHtml += `<br>Mukesh Ambani launched a new $20B mobile network, Reliance Jio`;
+                    }
+
+                }
+                else if (selectedOption == "Exports") {
+                }
+                else if (selectedOption == "Industry") {
+                    if (d.Year == 2014) {
+                        tooltipHtml += `<br>Modi introduced the Make in India initiative to encourage foreign companies to manufacture products in India`;
+                    }
+                }
                 d3.select("#tooltip")
                     .style("visibility", "visible")
                     .style("top", (event.pageY - 10) + "px")
                     .style("left", (event.pageX + 10) + "px")
-                    .html(`Year: ${d.Year}<br>${selectedOption}: ${d[selectedOption]}`);
+                    .html(tooltipHtml);
+                //.html(`Year: ${d.Year}<br>${selectedOption}: ${d[selectedOption]}`);
             })
             .on("mousemove", function (event) {
                 d3.select("#tooltip")
