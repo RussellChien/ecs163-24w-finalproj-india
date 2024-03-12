@@ -437,7 +437,7 @@ d3.csv("data/india_dataset_gdpindicators.csv").then(rawData => {
 
         // tooltip
         svg.selectAll(".bar")
-            .on("mouseover", function (event, d) {
+            .on("mouseover", function (d) {
                 d3.select("#tooltip")
                     .style("visibility", "visible")
                     .style("top", (event.pageY - 10) + "px")
