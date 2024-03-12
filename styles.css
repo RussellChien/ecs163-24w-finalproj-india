@@ -5,11 +5,18 @@
 #line-graph, #bar-chart {
     flex: 1; 
 }
-#bar_selector {
+/* #bar_selector {
     margin-top: 5px;
-    margin-left: 850px; 
+    margin-left: 500px; 
 }
 #line_selector {
     margin-top: 5px;
     margin-left: 100px; 
+} */
+#bar_selector {
+    margin-left: 30vw; 
+}
+
+#line_selector {
+    margin-left: 2vw; 
 }
