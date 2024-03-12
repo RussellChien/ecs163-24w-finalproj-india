@@ -37,6 +37,13 @@ const barOptions = {
     "Industry (including construction) value added (constant 2015 US$)": "Industry",
     "Foreign direct investment net inflows (% of GDP)": "FDI"
 }
+const barLabels = {
+    "GDP": "GDP (current US$) over time",
+    "Internet": "Individuals using the Internet (% of population) over time",
+    "Exports": "Exports of goods and services (% of GDP) over time",
+    "Industry": "Industry (including construction) value added (constant 2015 US$) over time",
+    "FDI": "Foreign direct investment net inflows (% of GDP) over time"
+}
 
 d3.select('#line_selector')
     .selectAll("options")
@@ -407,7 +414,7 @@ d3.csv("data/india_dataset_gdpindicators.csv").then(rawData => {
 
     function updateChart(selectedOption) {
         // Clear existing bars
-        //svg.selectAll(".bar").remove();
+        svg.selectAll(".bar").remove();
         console.log(selectedOption)
 
         // Recalculate y domain based on selected option
@@ -416,30 +423,25 @@ d3.csv("data/india_dataset_gdpindicators.csv").then(rawData => {
         // Redraw bars
         svg.selectAll(".bar")
             .data(data)
-            .transition()
-            .duration(5000)
-            //.enter().append("rect")
-            //.attr("class", "bar")
-            .attr("x", d => x(d.Year))
-            .attr("width", x.bandwidth())
-            .attr("y", d => y(d[selectedOption]))
-            .attr("height", d => height - y(d[selectedOption]));
-
-        // Optionally, update the y-axis if the scale significantly changes between indicators
-        //svg.select(".y-axis").call(d3.axisLeft(y));
-        svg.select(".y-axis").transition().duration(5000).call(d3.axisLeft(y));
-
-        svg.selectAll(".bar")
-            .data(data)
             .enter().append("rect")
             .attr("class", "bar")
+            .transition()
+            .duration(5000)
             .attr("x", d => x(d.Year))
             .attr("width", x.bandwidth())
             .attr("y", d => y(d[selectedOption]))
             .attr("height", d => height - y(d[selectedOption]))
-            .on("mouseover", function (event, d) {
+            .style("fill", "orange")
+
+        svg.select(".y-axis").transition().duration(5000).call(d3.axisLeft(y));
+
+        // tooltip
+        svg.selectAll(".bar")
+            .on("mouseover", function (d) {
                 d3.select("#tooltip")
                     .style("visibility", "visible")
+                    .style("top", (event.pageY - 10) + "px")
+                    .style("left", (event.pageX + 10) + "px")
                     .html(`Year: ${d.Year}<br>${selectedOption}: ${d[selectedOption]}`);
             })
             .on("mousemove", function (event) {
@@ -451,6 +453,22 @@ d3.csv("data/india_dataset_gdpindicators.csv").then(rawData => {
                 d3.select("#tooltip")
                     .style("visibility", "hidden");
             });
+
+        let chartTitle = svg.selectAll(".chart-title").data([selectedOption]);
+
+        // Update the title text if it exists
+        chartTitle
+            .text(barLabels[selectedOption]);
+
+        // bar chart title
+        chartTitle.enter()
+            .append("text")
+            .attr("class", "chart-title")
+            .attr("x", width / 2)
+            .attr("y", height + margin.bottom - 10)
+            .attr("font-size", "20px")
+            .attr("text-anchor", "middle")
+            .text(barLabels[selectedOption]);
 
     }
 
@@ -471,8 +489,5 @@ d3.csv("data/india_dataset_gdpindicators.csv").then(rawData => {
     d3.select('#bar_selector').on("change", function (d) {
         let selectedOption = d3.select(this).property("value");
         updateChart(barOptions[selectedOption]);
-
-
-
     });
 });
