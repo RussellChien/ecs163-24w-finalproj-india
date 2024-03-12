@@ -571,6 +571,9 @@ d3.csv("data/india_dataset_gdpindicators.csv").then((rawData) => {
                     if (d.Year == 2000) {
                         tooltipHtml += `<br>Microsoft announces a $2B investment over 4 years`;
                     }
+                    else if (d.Year == 2005) {
+                        tooltipHtml += `<br>India liberalised its FDI policy in 2005, allowing up to a 100% FDI stake in ventures`;
+                    }
                     else if (d.Year == 2014) {
                         tooltipHtml += `<br>Amazon invests $2B`;
                     }
@@ -585,7 +588,10 @@ d3.csv("data/india_dataset_gdpindicators.csv").then((rawData) => {
                     } 
                 }
                 else if (selectedOption == "GDP") {
-                    if (d.Year == 2014) {
+                    if (d.Year == 2005) {
+                        tooltipHtml += `<br>India liberalised its FDI policy in 2005, allowing up to a 100% FDI stake in ventures`;
+                    }
+                    else if (d.Year == 2014) {
                         tooltipHtml += `<br>During Modi's first year in office, India's GDP grew at a rate of 7.5%, making India the fastest growing economy in the world`;
                     }
                 }
@@ -599,10 +605,18 @@ d3.csv("data/india_dataset_gdpindicators.csv").then((rawData) => {
 
                 }
                 else if (selectedOption == "Exports") {
+                    if (d.Year == 2010) {
+                        tooltipHtml += `<br>Exports increased 22.3% year-on-year`;
+                    
+                    }
                 }
                 else if (selectedOption == "Industry") {
                     if (d.Year == 2014) {
                         tooltipHtml += `<br>Modi introduced the Make in India initiative to encourage foreign companies to manufacture products in India`;
+                    }
+                    else if (d.Year == 2019) {
+                        tooltipHtml += `<br>India surpassed Japan as the second largest steel producer`;
+                    
                     }
                 }
                 d3.select("#tooltip")
