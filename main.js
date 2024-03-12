@@ -90,13 +90,11 @@ d3.csv("data/india_dataset.csv").then(rawData => {
     console.log(rawData)
     var svg = d3.select("#line-graph")
         .append("svg")
-        // const g1 = svg.append("g")
         .attr("width", width + 60)
         .attr("height", height + 60)
         .attr("transform", `translate(${margin.left}, ${margin.top + 20})`)
 
     // x axis
-    // g1
     svg.append("text")
         .classed("x_label", true)
         .attr("x", width / 2)
@@ -106,7 +104,6 @@ d3.csv("data/india_dataset.csv").then(rawData => {
         .text("Individuals using the Internet (% of population)")
 
     // y axis
-    //g1
     svg.append("text")
         .attr("x", -(height / 2))
         .attr("y", 15)
@@ -142,7 +139,6 @@ d3.csv("data/india_dataset.csv").then(rawData => {
 
     let xAxisCall = d3.axisBottom(x1)
         .ticks(7)
-    //g1
     svg.append("g")
         .classed("x_axis", true)
         .attr("transform", `translate(${50}, ${height})`)
@@ -180,7 +176,6 @@ d3.csv("data/india_dataset.csv").then(rawData => {
 
     let yAxisCall = d3.axisLeft(y1)
         .ticks(13)
-    //g1
     svg.append("g").attr("transform", `translate(${50}, ${0})`).call(yAxisCall)
 
     const filteredData = rawData.filter(d => d.IndicatorName === "Individuals using the Internet (% of population)" || d.IndicatorCode === "EG.ELC.ACCS.ZS")
@@ -191,7 +186,7 @@ d3.csv("data/india_dataset.csv").then(rawData => {
         grpah1dataPoints.push(graph1point)
     }
     console.log(grpah1dataPoints)
-    let graph_path = //g1
+    let graph_path =
         svg.append("path")
             .datum(grpah1dataPoints)
             .attr("transform", `translate(${50}, ${0})`)
@@ -245,7 +240,6 @@ d3.csv("data/india_dataset.csv").then(rawData => {
         xAxisCall = d3.axisBottom(x1)
             .ticks(7)
 
-        //g1
         svg.selectAll(".x_axis").transition().duration(5000).call(xAxisCall)
 
         let updatedFilteredData = rawData.filter(d => d.IndicatorName === new_option || d.IndicatorCode === "EG.ELC.ACCS.ZS")
@@ -288,10 +282,8 @@ d3.csv("data/india_dataset.csv").then(rawData => {
             .duration(5000)
             .attr("stroke-dashoffset", 0)
 
-        //g1
         svg.selectAll(".x_label").remove()
 
-        //g1
         svg.append("text")
             .classed("x_label", true)
             .attr("x", width / 2)
@@ -299,10 +291,7 @@ d3.csv("data/india_dataset.csv").then(rawData => {
             .attr("font-size", "20px")
             .attr("text-anchor", "middle")
             .text(optionLabels[new_option])
-
     })
-
-
 })
 
 // parallel coordinates plot
@@ -324,8 +313,6 @@ d3.csv("data/india_dataset_gdpindicators.csv").then(rawData => {
         .attr("height", height + margin.top + margin.bottom)
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-
 
     var yScales = {};
     dimensions.forEach(function (dimension) {
@@ -377,14 +364,11 @@ d3.csv("data/india_dataset_gdpindicators.csv").then(rawData => {
         .style("font-weight", "bold")
         .style("fill", "black")
         .style("font-size", "14px");
-
-
-
 })
 
 d3.select('#bar_selector')
     .selectAll("options")
-    .data(options)
+    .data(dimensions)
     .enter()
     .append('option')
     .text(function (d) { return d; })
@@ -405,7 +389,7 @@ d3.csv("data/india_dataset_gdpindicators.csv").then(rawData => {
     console.log(data)
 
     var margin = { top: 30, right: 140, bottom: 60, left: 90 },
-        width = 1000 - margin.left - margin.right,
+        width = screenWidth / 2 - margin.left - margin.right,
         height = 550 - margin.top - margin.bottom;
 
     var svg = d3.select("#bar-chart")
@@ -423,7 +407,7 @@ d3.csv("data/india_dataset_gdpindicators.csv").then(rawData => {
 
     function updateChart(selectedOption) {
         // Clear existing bars
-        svg.selectAll(".bar").remove();
+        //svg.selectAll(".bar").remove();
         console.log(selectedOption)
 
         // Recalculate y domain based on selected option
@@ -432,15 +416,42 @@ d3.csv("data/india_dataset_gdpindicators.csv").then(rawData => {
         // Redraw bars
         svg.selectAll(".bar")
             .data(data)
-            .enter().append("rect")
-            .attr("class", "bar")
+            .transition()
+            .duration(5000)
+            //.enter().append("rect")
+            //.attr("class", "bar")
             .attr("x", d => x(d.Year))
             .attr("width", x.bandwidth())
             .attr("y", d => y(d[selectedOption]))
             .attr("height", d => height - y(d[selectedOption]));
 
         // Optionally, update the y-axis if the scale significantly changes between indicators
-        svg.select(".y-axis").call(d3.axisLeft(y));
+        //svg.select(".y-axis").call(d3.axisLeft(y));
+        svg.select(".y-axis").transition().duration(5000).call(d3.axisLeft(y));
+
+        svg.selectAll(".bar")
+            .data(data)
+            .enter().append("rect")
+            .attr("class", "bar")
+            .attr("x", d => x(d.Year))
+            .attr("width", x.bandwidth())
+            .attr("y", d => y(d[selectedOption]))
+            .attr("height", d => height - y(d[selectedOption]))
+            .on("mouseover", function (event, d) {
+                d3.select("#tooltip")
+                    .style("visibility", "visible")
+                    .html(`Year: ${d.Year}<br>${selectedOption}: ${d[selectedOption]}`);
+            })
+            .on("mousemove", function (event) {
+                d3.select("#tooltip")
+                    .style("top", (event.pageY - 10) + "px")
+                    .style("left", (event.pageX + 10) + "px");
+            })
+            .on("mouseout", function () {
+                d3.select("#tooltip")
+                    .style("visibility", "hidden");
+            });
+
     }
 
     // Initial chart setup
@@ -460,28 +471,8 @@ d3.csv("data/india_dataset_gdpindicators.csv").then(rawData => {
     d3.select('#bar_selector').on("change", function (d) {
         let selectedOption = d3.select(this).property("value");
         updateChart(barOptions[selectedOption]);
-    });
 
-    svg.selectAll(".bar")
-        .data(data)
-        .enter().append("rect")
-        .attr("class", "bar")
-        .attr("x", d => x(d.Year))
-        .attr("width", x.bandwidth())
-        .attr("y", d => y(d[selectedOption]))
-        .attr("height", d => height - y(d[selectedOption]))
-        .on("mouseover", function (event, d) {
-            d3.select("#tooltip")
-                .style("visibility", "visible")
-                .html(`Year: ${d.Year}<br>${selectedOption}: ${d[selectedOption]}`);
-        })
-        .on("mousemove", function (event) {
-            d3.select("#tooltip")
-                .style("top", (event.pageY - 10) + "px")
-                .style("left", (event.pageX + 10) + "px");
-        })
-        .on("mouseout", function () {
-            d3.select("#tooltip")
-                .style("visibility", "hidden");
-        });
+
+
+    });
 });
