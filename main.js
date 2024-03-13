@@ -605,7 +605,10 @@ d3.csv("data/india_dataset_gdpindicators.csv").then((rawData) => {
 
                 }
                 else if (selectedOption == "Exports") {
-                    if (d.Year == 2010) {
+                    if (d.Year == 2008) {
+                        tooltipHtml += `<br>Export growth rate slowed down from 15% to 5% due to the global financial crisis`;
+                    }
+                    else if (d.Year == 2010) {
                         tooltipHtml += `<br>Exports increased 22.3% year-on-year`;
                     
                     }
